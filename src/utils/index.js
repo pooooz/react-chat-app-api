@@ -10,17 +10,18 @@ import childProcess from 'child_process';
 export const colorString = (string, colors) => {
   let counter = 0;
   const colorNames = Object.keys(colors);
-  return string.split(' ').map(word => {
+  return string.split(' ').map((word) => {
     if (counter === colorNames.length) {
       counter = 0;
     }
+
     return colors[colorNames[counter++]](word);
   }).join(' ');
-}
+};
 
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
 export const question = util.promisify(rl.question).bind(rl);
