@@ -2,10 +2,11 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import colors from 'colors';
 
-import { colorString } from "../utils/index.js";
+import { colorString } from '../utils/index.js';
 
 (function run() {
-  const argv = yargs(hideBin(process.argv)).argv
+  console.log('Попал');
+  const { argv } = yargs(hideBin(process.argv));
   if (argv.a > argv.b) {
     throw new Error('Неверно указан диапазон!'.red);
   }
@@ -36,9 +37,9 @@ import { colorString } from "../utils/index.js";
     red: colors.red,
     yellow: colors.yellow,
     green: colors.green,
-  }
+  };
 
   const coloredPrimes = colorString(primes.join(' '), colorsObject);
   console.log('Результат: ', coloredPrimes);
-})()
-
+  process.exit();
+}());

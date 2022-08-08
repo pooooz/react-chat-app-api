@@ -1,7 +1,6 @@
 import colors from 'colors';
 
-import { question, execute } from './src/utils/index.js';
-import {colorString} from './src/utils/index.js';
+import { question, execute, colorString } from './src/utils/index.js';
 
 const getMenuInput = async () => {
   console.log('Меню:'.blue);
@@ -29,7 +28,7 @@ const task1 = async () => {
     red: colors.red,
     yellow: colors.yellow,
     blue: colors.blue,
-  }
+  };
   console.log(colorString(greeting, colorsObj));
 
   let num1;
@@ -64,9 +63,9 @@ const task2 = async () => {
   let file;
   while (!file) {
     file = await question('Укажите название файла с статистикой (он должен находится в папке headsOrTails): ');
-    const questionText = 'Орёл или решка???'.bgCyan + '\n' +
-      'Если загадали орла, то введите 0!'.bgMagenta + '\n' +
-      'Если загадали решку, то введите 1!'.bgYellow + '\n';
+    const questionText = `${'Орёл или решка???'.bgCyan}\n${
+      'Если загадали орла, то введите 0!'.bgMagenta}\n${
+      'Если загадали решку, то введите 1!'.bgYellow}\n`;
     let guess;
     while (!guess) {
       guess = await question(questionText);
@@ -118,7 +117,6 @@ const startMenu = async () => {
   }
 };
 
-
 (function run() {
-  startMenu().catch(error => console.error(error));
-})()
+  startMenu().catch((error) => console.error(error));
+}());
