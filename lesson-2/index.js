@@ -12,7 +12,7 @@ await inquirer.prompt([
     name: 'taskName',
     type: 'list',
     message: colors.bgMagenta('\nВыберите задание:'),
-    choices: ['timer'],
+    choices: ['timer', 'generator'],
   },
 ]).then(({ taskName }) => {
   console.log('Вы выбрали: ', taskName);
