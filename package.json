@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "start:dev": "nodemon index.js",
-    "lint": "npx eslint lesson-1/src --ext .js --fix"
+    "lint": "npx eslint --ext .js --fix"
   },
   "repository": {
     "type": "git",
