@@ -1,12 +1,12 @@
 {
   "name": "nodejs-basics",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "lesson-1/index.js",
   "type": "module",
   "scripts": {
     "start": "node index.js",
     "start:dev": "nodemon index.js",
-    "lint": "npx eslint ./src --ext .js --fix"
+    "lint": "npx eslint --ext .js --fix"
   },
   "repository": {
     "type": "git",
@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "colors": "^1.4.0",
+    "inquirer": "^9.1.0",
     "minimist": "^1.2.6",
     "yargs": "^17.5.1"
   }
