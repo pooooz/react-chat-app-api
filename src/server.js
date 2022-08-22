@@ -4,6 +4,8 @@ import 'dotenv/config';
 
 import ChatRouter from './routes/chat.js';
 import MessageRouter from './routes/messages.js';
+import AuthRouter from './routes/auth.js';
+import { verifyToken } from './middlewares/tokenMiddleware.js';
 import { errorMiddleware } from './middlewares/errorMiddleware.js';
 
 const URI = process.env.MONGODB_URI;
@@ -21,6 +23,12 @@ app.get('/status', (req, res) => res.send('OK'));
 
 app.use('/chats', ChatRouter);
 app.use('/messages', MessageRouter);
+
+app.use('/', AuthRouter);
+
+app.get('/profile', verifyToken, (req, res) => {
+  res.send('Im secured');
+});
 
 app.use(errorMiddleware);
 
