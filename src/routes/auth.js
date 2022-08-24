@@ -58,9 +58,10 @@ router.post('/signin', async (req, res) => {
   try {
     await Tokens.create({ token: refreshToken, email: user.email });
     res.status(200);
-    res.json({ accessToken, refreshToken });
+    res.json({
+      accessToken, refreshToken, username: user.username, userId: user._id,
+    });
   } catch (error) {
-    console.log(error);
     res.status(500);
     res.json({ error: true, message: 'Refresh token was not created' });
   }
@@ -90,7 +91,7 @@ router.post('/token', async (req, res) => {
           { expiresIn: accessTokenLifetime },
         );
         res.status(200);
-        res.json({ accessToken });
+        res.json({ accessToken, isActual: true });
       } catch (error) {
         console.log(error);
       }
