@@ -6,12 +6,22 @@ import { Users } from '../models/users.js';
 
 const router = express.Router();
 
-router.get('/', verifyToken, async (_, res) => {
-  const chats = await Chats.find({});
-  res.json(chats);
+router.get('/:userId', verifyToken, async (req, res, next) => {
+  const { userId } = req.params;
+  try {
+    if (userId) {
+      const chats = await Chats.find({ creator: userId });
+      console.log(chats);
+      res.json(chats);
+    } else {
+      throw new Error('User is not found');
+    }
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', verifyToken, async (req, res, next) => {
   try {
     const newChat = await Chats.create(req.body);
     const creator = await Users.findById(req.body.creator);
