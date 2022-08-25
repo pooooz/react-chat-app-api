@@ -7,7 +7,7 @@ import { Tokens } from '../models/tokens.js';
 
 const router = express.Router();
 
-const accessTokenLifetime = '1m';
+const accessTokenLifetime = '30s';
 const refreshTokenLifetime = '1d';
 
 router.post('/signup', async (req, res, next) => {

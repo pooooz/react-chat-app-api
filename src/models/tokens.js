@@ -23,4 +23,4 @@ const TokenSchema = new Schema(
   },
 );
 
-export const Tokens = model('Token', TokenSchema, 'Token');
+export const Tokens = model('Tokens', TokenSchema, 'Tokens');
