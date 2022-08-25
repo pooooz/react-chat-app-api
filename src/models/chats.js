@@ -10,6 +10,11 @@ const ChatSchema = new Schema({
     required: true,
     unique: true,
   },
+  creator: {
+    type: Schema.Types.ObjectId,
+    ref: 'Users',
+    required: true,
+  },
 }, {
   timestamps: true,
 });

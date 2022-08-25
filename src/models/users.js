@@ -19,6 +19,11 @@ const UserSchema = new Schema({
     required: true,
     default: 'Basic User',
   },
+  chats: {
+    type: [{ type: Schema.Types.ObjectId, ref: 'Chats' }],
+    required: true,
+    default: [],
+  },
 });
 
 UserSchema.pre('save', async function (next) {

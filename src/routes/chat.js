@@ -2,6 +2,7 @@ import express from 'express';
 
 import { verifyToken } from '../middlewares/tokenMiddleware.js';
 import { Chats } from '../models/chats.js';
+import { Users } from '../models/users.js';
 
 const router = express.Router();
 
@@ -10,9 +11,14 @@ router.get('/', verifyToken, async (_, res) => {
   res.json(chats);
 });
 
-router.post('/', verifyToken, async (req, res, next) => {
+router.post('/', async (req, res, next) => {
   try {
     const newChat = await Chats.create(req.body);
+    const creator = await Users.findById(req.body.creator);
+    await Users.findByIdAndUpdate(
+      req.body.creator,
+      { $set: { chats: [...creator.chats, newChat._id] } },
+    );
     res.status(201);
     res.json(newChat);
   } catch (error) {
