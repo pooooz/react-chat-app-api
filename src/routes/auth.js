@@ -54,7 +54,8 @@ router.post('/signin', async (req, res) => {
     { expiresIn: refreshTokenLifetime },
   );
 
-  await Tokens.findOne({ email: user.email }).update({ isActual: false });
+  await Tokens
+    .findOneAndUpdate({ email: user.email, isActual: true }, { $set: { isActual: false } });
   try {
     await Tokens.create({ token: refreshToken, email: user.email });
     res.status(200);

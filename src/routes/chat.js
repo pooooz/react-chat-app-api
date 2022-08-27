@@ -7,15 +7,9 @@ import { Users } from '../models/users.js';
 const router = express.Router();
 
 router.get('/:userId', verifyToken, async (req, res, next) => {
-  const { userId } = req.params;
   try {
-    if (userId) {
-      const chats = await Chats.find({ creator: userId });
-      console.log(chats);
-      res.json(chats);
-    } else {
-      throw new Error('User is not found');
-    }
+    const chats = await Chats.find({ creator: req.params.userId });
+    res.json(chats);
   } catch (error) {
     next(error);
   }
@@ -39,6 +33,13 @@ router.post('/', verifyToken, async (req, res, next) => {
 router.delete('/:id', verifyToken, async (req, res, next) => {
   try {
     const deleted = await Chats.findByIdAndDelete(req.params.id);
+    const creator = await Users.findById(deleted.creator);
+    const newChats = creator.chats.filter((chat) => chat._id.toString() !== req.params.id);
+
+    await Users.findByIdAndUpdate(
+      deleted.creator,
+      { $set: { chats: newChats } },
+    );
     res.json(deleted);
   } catch (error) {
     next(error);

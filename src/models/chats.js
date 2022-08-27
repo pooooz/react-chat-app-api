@@ -8,7 +8,6 @@ const ChatSchema = new Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
   },
   creator: {
     type: Schema.Types.ObjectId,
