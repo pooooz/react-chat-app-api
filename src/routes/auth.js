@@ -7,7 +7,7 @@ import { Tokens } from '../models/tokens.js';
 
 const router = express.Router();
 
-const accessTokenLifetime = '1m';
+const accessTokenLifetime = '5m';
 const refreshTokenLifetime = '1d';
 
 router.post('/signup', async (req, res, next) => {
@@ -54,13 +54,15 @@ router.post('/signin', async (req, res) => {
     { expiresIn: refreshTokenLifetime },
   );
 
-  await Tokens.findOne({ email: user.email }).update({ isActual: false });
+  await Tokens
+    .findOneAndUpdate({ email: user.email, isActual: true }, { $set: { isActual: false } });
   try {
     await Tokens.create({ token: refreshToken, email: user.email });
     res.status(200);
-    res.json({ accessToken, refreshToken });
+    res.json({
+      accessToken, refreshToken, username: user.username, userId: user._id,
+    });
   } catch (error) {
-    console.log(error);
     res.status(500);
     res.json({ error: true, message: 'Refresh token was not created' });
   }
@@ -90,7 +92,7 @@ router.post('/token', async (req, res) => {
           { expiresIn: accessTokenLifetime },
         );
         res.status(200);
-        res.json({ accessToken });
+        res.json({ accessToken, isActual: true });
       } catch (error) {
         console.log(error);
       }
