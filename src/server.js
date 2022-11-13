@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import 'dotenv/config';
 
-import ChatRouter from './routes/chat.js';
+import ChatRouter from './routes/chats.js';
 import MessageRouter from './routes/messages.js';
 import UserRouter from './routes/user.js';
 import AuthRouter from './routes/auth.js';
