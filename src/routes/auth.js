@@ -5,15 +5,18 @@ import jwt from 'jsonwebtoken';
 import { Users } from '../models/users.js';
 import { Tokens } from '../models/tokens.js';
 
+import { convertLifetimeStringToMilliseconds } from '../utils/index.js';
+
 const router = express.Router();
 
-const accessTokenLifetime = '5m';
-const refreshTokenLifetime = '1d';
+const accessTokenLifetime = '10s';
+const refreshTokenLifetime = '30s';
 
 router.post('/signup', async (req, res, next) => {
   try {
     const newUser = await Users.create(req.body);
     const { _id, email } = newUser;
+
     res.status(201);
     res.send({ id: _id, email });
   } catch (error) {
@@ -24,22 +27,26 @@ router.post('/signup', async (req, res, next) => {
 router.post('/signin', async (req, res) => {
   const { email, password } = req.body;
   const user = await Users.findOne({ email });
+
   if (!user) {
-    res.status(400);
-    res.json({ message: 'User or password is wrong' });
+    res
+      .status(400)
+      .json({ message: 'Email or password is wrong' });
     return;
   }
   const compare = await bcrypt.compare(password, user.password);
 
   if (!compare) {
-    res.status(400);
-    res.json({ message: 'User or password is wrong' });
+    res
+      .status(400)
+      .json({ message: 'Email or password is wrong' });
     return;
   }
 
   const data = {
     id: user._id,
     email: user.email,
+    name: user.name,
   };
 
   const accessToken = jwt.sign(
@@ -56,22 +63,36 @@ router.post('/signin', async (req, res) => {
 
   await Tokens
     .findOneAndUpdate({ email: user.email, isActual: true }, { $set: { isActual: false } });
+
   try {
     await Tokens.create({ token: refreshToken, email: user.email });
-    res.status(200);
-    res.json({
-      accessToken, refreshToken, username: user.username, userId: user._id,
-    });
+
+    res
+      .status(200)
+      .cookie('accessToken', accessToken, {
+        maxAge: convertLifetimeStringToMilliseconds(accessTokenLifetime),
+        secure: true,
+      })
+      .cookie('refreshToken', refreshToken, {
+        maxAge: convertLifetimeStringToMilliseconds(refreshTokenLifetime),
+        secure: true,
+      })
+      .json({
+        accessToken, refreshToken, name: user.name, id: user._id,
+      });
   } catch (error) {
-    res.status(500);
-    res.json({ error: true, message: 'Refresh token was not created' });
+    res
+      .status(500)
+      .json({ error: true, message: 'Refresh token was not created' });
   }
 });
 
-router.post('/token', async (req, res) => {
-  const { refreshToken } = req.body;
+router.post('/refresh', async (req, res) => {
+  const { refreshToken } = req.cookies;
+
   if (refreshToken) {
-    const decode = jwt.decode(refreshToken);
+    const dataObject = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+
     const actualToken = await Tokens.findOne({ token: refreshToken, isActual: true });
 
     try {
@@ -85,14 +106,21 @@ router.post('/token', async (req, res) => {
     }
 
     if (actualToken) {
+      const { id, email } = dataObject;
       try {
         const accessToken = jwt.sign(
-          { id: decode.id, email: decode.email },
+          { id, email },
           process.env.ACCESS_TOKEN_SECRET,
           { expiresIn: accessTokenLifetime },
         );
-        res.status(200);
-        res.json({ accessToken, isActual: true });
+
+        res
+          .status(200)
+          .cookie('accessToken', accessToken, {
+            maxAge: convertLifetimeStringToMilliseconds(accessTokenLifetime),
+            secure: true,
+          })
+          .json({ accessToken, refreshToken });
       } catch (error) {
         console.log(error);
       }

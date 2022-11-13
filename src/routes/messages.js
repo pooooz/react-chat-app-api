@@ -1,21 +1,20 @@
 import express from 'express';
 
-import { verifyToken } from '../middlewares/tokenMiddleware.js';
 import { Messages } from '../models/messages.js';
 
 const router = express.Router();
 
 router
-  .get('/', verifyToken, async (_, res) => {
+  .get('/', async (_, res) => {
     const messages = await Messages.find();
     res.json(messages);
   })
-  .get('/:chatId', verifyToken, async (req, res) => {
+  .get('/:chatId', async (req, res) => {
     const chatMessages = await Messages.find({ chatId: req.params.chatId });
     res.send(chatMessages);
   });
 
-router.post('/', verifyToken, async (req, res, next) => {
+router.post('/', async (req, res, next) => {
   try {
     const newMessage = await Messages.create(req.body);
     res.json(newMessage);
@@ -24,7 +23,7 @@ router.post('/', verifyToken, async (req, res, next) => {
   }
 });
 
-router.delete('/:messageId', verifyToken, async (req, res, next) => {
+router.delete('/:messageId', async (req, res, next) => {
   try {
     const deleted = await Messages.findByIdAndDelete(req.params.messageId);
     res.json(deleted);
@@ -33,7 +32,7 @@ router.delete('/:messageId', verifyToken, async (req, res, next) => {
   }
 });
 
-router.put('/:messageId', verifyToken, async (req, res, next) => {
+router.put('/:messageId', async (req, res, next) => {
   try {
     const outdated = await Messages.findByIdAndUpdate(req.params.messageId, { $set: req.body });
     res.json(outdated);

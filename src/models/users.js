@@ -14,7 +14,7 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
-  username: {
+  name: {
     type: String,
     required: true,
     default: 'Basic User',
