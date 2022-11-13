@@ -18,5 +18,6 @@ module.exports = {
     'no-underscore-dangle': 0,
     'linebreak-style': 0,
     'import/prefer-default-export': 0,
+    'class-methods-use-this': 0,
   },
 };
