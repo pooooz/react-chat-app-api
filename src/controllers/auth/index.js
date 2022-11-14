@@ -90,9 +90,6 @@ class Auth {
 
         const actualToken = await Tokens.findOne({ token: refreshToken, isActual: true });
 
-        JWT.verify(refreshToken, REFRESH_TOKEN_SECRET);
-        await Tokens.findOne({ token: refreshToken, isActual: true }).update({ isActual: false });
-
         if (actualToken) {
           const { id, email } = dataObject;
           const accessToken = JWT.sign(
@@ -115,6 +112,7 @@ class Auth {
         next({ status: 400, message: 'Token not provided' });
       }
     } catch (error) {
+      await Tokens.findOne({ token: refreshToken, isActual: true }).update({ isActual: false });
       next(error);
     }
   }
