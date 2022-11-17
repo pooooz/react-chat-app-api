@@ -82,9 +82,9 @@ class Auth {
   }
 
   async refreshToken(req, res, next) {
-    try {
-      const { refreshToken } = req.cookies;
+    const { refreshToken } = req.cookies;
 
+    try {
       if (refreshToken) {
         const dataObject = JWT.verify(refreshToken, REFRESH_TOKEN_SECRET);
 
