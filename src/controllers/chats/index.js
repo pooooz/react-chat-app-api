@@ -28,9 +28,9 @@ class Chat {
 
   async deleteChat(req, res, next) {
     try {
-      const deleted = await Chats.findByIdAndDelete(req.params.id);
+      const deleted = await Chats.findByIdAndDelete(req.params.chatId);
       const creator = await Users.findById(deleted.creator);
-      const newChats = creator.chats.filter((chat) => chat._id.toString() !== req.params.id);
+      const newChats = creator.chats.filter((chat) => chat._id.toString() !== req.params.chatId);
 
       await Users.findByIdAndUpdate(
         deleted.creator,
@@ -45,7 +45,7 @@ class Chat {
   async updateChat(req, res, next) {
     try {
       const outdated = await Chats
-        .findByIdAndUpdate(req.params.id, { $set: req.body });
+        .findByIdAndUpdate(req.params.chatId, { $set: req.body });
       res.json(outdated);
     } catch (error) {
       next(error);
