@@ -33,15 +33,13 @@ export const configureWebSocket = (wss) => {
           leave(chatId, connectionId);
           break;
         case 'message':
-          Object.entries(rooms[chatId])
-            .forEach(([, sock]) => {
-              Messages.create({ text, author, chatId })
-                .then((created) => {
-                  sock.send(JSON.stringify(created));
-                }).catch((error) => {
-                  console.error(error);
-                });
+          Messages.create({ text, author, chatId }).then((created) => {
+            Object.entries(rooms[chatId]).forEach(([, sock]) => {
+              sock.send(JSON.stringify(created));
             });
+          }).catch((error) => {
+            console.error(error);
+          });
           break;
         default:
           console.warn(`Type: ${type} unknown`);
