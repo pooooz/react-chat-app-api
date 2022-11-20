@@ -3,7 +3,6 @@ import { Messages } from '../../models/messages.js';
 class Message {
   async getMessagesByChatId(req, res, next) {
     try {
-      console.log(req.user);
       const chatMessages = await Messages.find({ chatId: req.params.chatId });
       res.send(chatMessages);
     } catch (error) {

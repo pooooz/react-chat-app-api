@@ -1,3 +1,6 @@
+import http from 'http';
+
+import { WebSocketServer } from 'ws';
 import express from 'express';
 import mongoose from 'mongoose';
 import passport from 'passport';
@@ -12,14 +15,20 @@ import AuthRouter from './routes/auth.js';
 
 import { errorMiddleware } from './middlewares/errorMiddleware.js';
 import { authStrategy } from './middlewares/passportStrategy.js';
+import { configureWebSocket } from './utils/configureWebSocket.js';
 
 const URI = process.env.MONGODB_URI;
 
+const app = express();
+
+const server = http.createServer(app);
+
+const webSocketServer = new WebSocketServer({ server });
+configureWebSocket(webSocketServer);
+
 mongoose.connect(URI).then(() => {
   console.log('Connected to DB');
-}).catch((error) => console.log(error));
-
-const app = express();
+}).catch((error) => console.error(error));
 
 const corsOptions = {
   origin: [process.env.ALLOWED_ORIGINS.split(' ')],
@@ -34,8 +43,6 @@ app.use(cookieParser());
 
 passport.use(authStrategy);
 
-app.get('/status', (req, res) => res.send('OK'));
-
 app.use('/chats', passport.authenticate('jwt', { session: false }), ChatRouter);
 app.use('/messages', passport.authenticate('jwt', { session: false }), MessageRouter);
 app.use('/user', passport.authenticate('jwt', { session: false }), UserRouter);
@@ -49,3 +56,4 @@ app.all('*', (_, res) => {
 });
 
 app.listen(process.env.PORT || 5000, () => console.log(`Server is running on http://localhost:${process.env.PORT}`));
+server.listen(process.env.WEBSOCKET_PORT || 5001, () => console.log(`WebSocket is running on http://localhost:${process.env.WEBSOCKET_PORT}`));

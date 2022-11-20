@@ -82,16 +82,13 @@ class Auth {
   }
 
   async refreshToken(req, res, next) {
-    try {
-      const { refreshToken } = req.cookies;
+    const { refreshToken } = req.cookies;
 
+    try {
       if (refreshToken) {
         const dataObject = JWT.verify(refreshToken, REFRESH_TOKEN_SECRET);
 
         const actualToken = await Tokens.findOne({ token: refreshToken, isActual: true });
-
-        JWT.verify(refreshToken, REFRESH_TOKEN_SECRET);
-        await Tokens.findOne({ token: refreshToken, isActual: true }).update({ isActual: false });
 
         if (actualToken) {
           const { id, email } = dataObject;
@@ -112,9 +109,10 @@ class Auth {
           next({ status: 401, message: 'Unauthorized access' });
         }
       } else {
-        next({ status: 400, message: 'Token not provided' });
+        next({ status: 401, message: 'Token not provided' });
       }
     } catch (error) {
+      await Tokens.findOne({ token: refreshToken, isActual: true }).update({ isActual: false });
       next(error);
     }
   }
