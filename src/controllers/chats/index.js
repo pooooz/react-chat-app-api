@@ -4,8 +4,16 @@ import { Users } from '../../models/users.js';
 class Chat {
   async getChatsByUserId(req, res, next) {
     try {
-      const chats = await Chats.find({ creator: req.params.userId });
-      res.json(chats);
+      const user = await Users.findById(req.params.userId);
+      if (user.chats.length !== 0) {
+        const chats = user.chats.map(async (chatId) => Chats.findById(chatId));
+        Promise.all(chats).then((result) => {
+          res.json(result);
+        });
+        return;
+      }
+
+      res.json([]);
     } catch (error) {
       next(error);
     }
@@ -26,27 +34,46 @@ class Chat {
     }
   }
 
-  async deleteChat(req, res, next) {
+  async leaveChat(req, res, next) {
     try {
-      const deleted = await Chats.findByIdAndDelete(req.params.chatId);
-      const creator = await Users.findById(deleted.creator);
-      const newChats = creator.chats.filter((chat) => chat._id.toString() !== req.params.chatId);
+      const member = await Users.findById(req.user.id);
+      const newChats = member.chats.filter((chat) => chat._id.toString() !== req.params.chatId);
 
       await Users.findByIdAndUpdate(
-        deleted.creator,
+        req.user.id,
         { $set: { chats: newChats } },
       );
-      res.json(deleted);
+      res.json({ _id: req.params.chatId });
     } catch (error) {
       next(error);
     }
   }
 
-  async updateChat(req, res, next) {
+  async addMember(req, res, next) {
     try {
-      const outdated = await Chats
-        .findByIdAndUpdate(req.params.chatId, { $set: req.body });
-      res.json(outdated);
+      const { id } = req.body;
+      const member = await Users.findById(id);
+
+      if (member) {
+        const newChats = [...member.chats, req.params.chatId];
+
+        const isAlreadyMember = member.chats.find(
+          (chatId) => chatId.toString() === req.params.chatId,
+        );
+
+        if (isAlreadyMember) {
+          res.json({ isInvited: true });
+          return;
+        }
+
+        await Users.findByIdAndUpdate(
+          id,
+          { $set: { chats: newChats } },
+        );
+        res.json({ isInvited: true });
+      } else {
+        next({ status: 400, message: 'The user with the given id does not exist' });
+      }
     } catch (error) {
       next(error);
     }

@@ -109,7 +109,7 @@ class Auth {
           next({ status: 401, message: 'Unauthorized access' });
         }
       } else {
-        next({ status: 400, message: 'Token not provided' });
+        next({ status: 401, message: 'Token not provided' });
       }
     } catch (error) {
       await Tokens.findOne({ token: refreshToken, isActual: true }).update({ isActual: false });
