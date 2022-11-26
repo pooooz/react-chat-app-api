@@ -1,9 +1,11 @@
 import { Strategy as JWTStrategy } from 'passport-jwt';
-import { Users } from '../models/users.js';
+import { Request } from 'express';
+
+import { Users } from '../models/users';
 
 const { ACCESS_TOKEN_SECRET } = process.env;
 
-const cookieExtractor = (req) => {
+const cookieExtractor = (req: Request) => {
   if (req.cookies) {
     return req.cookies.accessToken;
   }

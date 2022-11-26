@@ -1,8 +1,10 @@
 import mongoose from 'mongoose';
 
+import { TokenSchema } from './interfaces';
+
 const { Schema, model } = mongoose;
 
-const TokenSchema = new Schema(
+const TokenSchema = new Schema<TokenSchema>(
   {
     token: {
       type: String,

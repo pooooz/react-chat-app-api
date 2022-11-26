@@ -1,4 +1,4 @@
-export const convertLifetimeStringToMilliseconds = (lifetime) => {
+export const convertLifetimeStringToMilliseconds = (lifetime: string) => {
   if (/s$/.test(lifetime)) {
     return Number(lifetime.slice(0, -1)) * 1000;
   }

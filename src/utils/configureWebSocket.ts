@@ -1,9 +1,13 @@
 import { v4 as uuid } from 'uuid';
-import { Messages } from '../models/messages.js';
+import WebSocket, { Server } from 'ws';
 
-const rooms = {};
+import { Rooms } from './interfaces';
 
-const leave = (room, connectionId) => {
+import { Messages } from '../models/messages';
+
+const rooms: Rooms = {};
+
+const leave = (room: string, connectionId: string) => {
   if (!rooms[room][connectionId]) return;
 
   if (Object.keys(rooms[room]).length === 1) delete rooms[room];
@@ -11,12 +15,14 @@ const leave = (room, connectionId) => {
   else delete rooms[room][connectionId];
 };
 
-const join = (room, connectionId, socket) => {
+const join = (room: string, connectionId: string, socket: WebSocket) => {
   if (!rooms[room]) rooms[room] = {};
-  if (!rooms[room][connectionId]) rooms[room][connectionId] = socket;
+  if (!rooms[room][connectionId]) {
+    rooms[room][connectionId] = socket;
+  }
 };
 
-export const configureWebSocket = (wss) => {
+export const configureWebSocket = (wss: Server<WebSocket>) => {
   wss.on('connection', (ws) => {
     const connectionId = uuid();
     ws.on('message', (message) => {
