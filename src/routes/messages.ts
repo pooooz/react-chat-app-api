@@ -5,7 +5,7 @@ import { permissionCheck } from '../middlewares/permissionMiddleware';
 
 const router = express.Router();
 
-router.get('/:chatId', permissionCheck('member'), MessagesController.getMessagesByChatId);
+router.get('/:chatId', permissionCheck('chatMember'), MessagesController.getMessagesByChatId);
 router.post('/', MessagesController.createMessage);
 router.delete('/:messageId', MessagesController.deleteMessage);
 router.put('/:messageId', MessagesController.updateMessage);

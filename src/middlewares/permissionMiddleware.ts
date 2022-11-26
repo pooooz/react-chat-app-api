@@ -6,15 +6,29 @@ import { CustomResponseError } from '../utils/exceptions';
 
 const permissionDeniedError = new CustomResponseError(403, 'Permission denied');
 
+type Permissions = 'chatCreator' | 'chatMember' | 'isAccountOwner';
+
 export const permissionCheck = (
-  permission = 'creator',
+  permission: Permissions = 'chatCreator',
 ) => async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   switch (permission) {
-    case 'creator': {
+    case 'isAccountOwner': {
+      try {
+        if (req.params.userId === req.user?.id) {
+          next();
+        } else {
+          next(permissionDeniedError);
+        }
+      } catch (error) {
+        next(error);
+      }
+      break;
+    }
+    case 'chatCreator': {
       try {
         const userInfo = req.user;
         const { chatId } = req.params;
@@ -31,7 +45,7 @@ export const permissionCheck = (
       }
       break;
     }
-    case 'member': {
+    case 'chatMember': {
       try {
         const userInfo = req.user;
         const { chatId } = req.params;

@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import { Chats } from '../../models/chats';
 import { Users } from '../../models/users';
 import { CustomResponseError } from '../../utils/exceptions';
+import { AddMemberPayloadSchema, CreateChatPayloadSchema } from '../../dto/chat';
 
 class Chat {
   async getChatsByUserId(req: Request, res: Response, next: NextFunction) {
@@ -25,12 +26,14 @@ class Chat {
 
   async createChat(req: Request, res: Response, next: NextFunction) {
     try {
-      const newChat = await Chats.create(req.body);
-      const creator = await Users.findById(req.body.creator);
+      const validChatPayload = await CreateChatPayloadSchema.validateAsync(req.body);
+
+      const newChat = await Chats.create(validChatPayload);
+      const creator = await Users.findById(validChatPayload.creator);
 
       if (creator) {
         await Users.findByIdAndUpdate(
-          req.body.creator,
+          validChatPayload.creator,
           { $set: { chats: [...creator.chats, newChat._id] } },
         );
         res.status(201);
@@ -61,7 +64,7 @@ class Chat {
 
   async addMember(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.body;
+      const { id } = await AddMemberPayloadSchema.validateAsync(req.body);
       const member = await Users.findById(id);
 
       if (member) {

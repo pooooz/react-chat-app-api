@@ -1,11 +1,22 @@
 import JWT from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
+import { ValidationError } from 'joi';
 
 import { CustomResponseError } from '../utils/exceptions';
 
 /* eslint no-unused-vars: 0 */
 export const errorMiddleware = (err: any, req: Request, res: Response, next: NextFunction) => {
   console.error(err);
+
+  if (err instanceof ValidationError) {
+    res.status(400).json(err.details[0]);
+    return;
+  }
+
+  if (err instanceof ReferenceError) {
+    res.status(400).json(err.message);
+    return;
+  }
 
   if (err instanceof JWT.TokenExpiredError) {
     res.status(401).json(err);

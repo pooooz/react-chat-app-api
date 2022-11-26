@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { Users } from '../../models/users';
+import { ChangeNamePayloadSchema } from '../../dto/user';
 
 class User {
   async getUserInfo(req: Request, res: Response, next: NextFunction) {
@@ -17,9 +18,11 @@ class User {
   }
 
   async changeName(req: Request, res: Response, next: NextFunction) {
-    const { id, newName } = req.body;
     try {
-      const outdated = await Users.findByIdAndUpdate(id, { $set: { name: newName } });
+      const { userId } = req.params;
+      const { newName } = await ChangeNamePayloadSchema.validateAsync(req.body);
+
+      const outdated = await Users.findByIdAndUpdate(userId, { $set: { name: newName } });
       res.json(outdated);
     } catch (error) {
       next(error);

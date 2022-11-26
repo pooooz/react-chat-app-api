@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { Messages } from '../../models/messages';
+import { CreateMessagePayloadSchema, UpdateMessagePayloadSchema } from '../../dto/message';
 
 class Message {
   async getMessagesByChatId(req: Request, res: Response, next: NextFunction) {
@@ -14,7 +15,9 @@ class Message {
 
   async createMessage(req: Request, res: Response, next: NextFunction) {
     try {
-      const newMessage = await Messages.create(req.body);
+      const validMessage = await CreateMessagePayloadSchema.validateAsync(req.body);
+
+      const newMessage = await Messages.create(validMessage);
       res.json(newMessage);
     } catch (error) {
       next(error);
@@ -32,7 +35,11 @@ class Message {
 
   async updateMessage(req: Request, res: Response, next: NextFunction) {
     try {
-      const outdated = await Messages.findByIdAndUpdate(req.params.messageId, { $set: req.body });
+      const validMessage = await UpdateMessagePayloadSchema.validateAsync(req.body);
+
+      const outdated = await Messages.findByIdAndUpdate(req.params.messageId, {
+        $set: validMessage,
+      });
       res.json(outdated);
     } catch (error) {
       next(error);

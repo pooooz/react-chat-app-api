@@ -12,13 +12,17 @@ import { Users } from '../../models/users';
 import { Tokens } from '../../models/tokens';
 import { convertLifetimeStringToMilliseconds } from '../../utils';
 import { CustomResponseError } from '../../utils/exceptions';
+import { AuthPayloadSchema } from '../../dto/user';
+import { RefreshPayloadSchema } from '../../dto/tokens';
 
 const badCreditsError = new CustomResponseError(400, 'Email or password is wrong');
 
 class Auth {
   async signUp(req: Request, res: Response, next: NextFunction) {
     try {
-      const newUser = await Users.create(req.body);
+      const validBody = await AuthPayloadSchema.validateAsync(req.body);
+
+      const newUser = await Users.create(validBody);
       const { _id, email } = newUser;
 
       res.status(201).send({ id: _id, email });
@@ -29,7 +33,8 @@ class Auth {
 
   async logIn(req: Request, res: Response, next: NextFunction) {
     try {
-      const { email, password } = req.body;
+      const { email, password } = await AuthPayloadSchema.validateAsync(req.body);
+
       const user = await Users.findOne({ email });
 
       if (!user) {
@@ -86,37 +91,37 @@ class Auth {
   }
 
   async refreshToken(req: Request, res: Response, next: NextFunction) {
-    const { refreshToken } = req.cookies;
-
+    let refreshTokenValue = '';
     try {
-      if (refreshToken) {
-        const dataObject: CustomJWTPayload | string = JWT.verify(refreshToken, refreshTokenSecret);
+      const { refreshToken } = await RefreshPayloadSchema.validateAsync(req.cookies);
+      refreshTokenValue = refreshToken;
 
-        const actualToken = await Tokens.findOne({ token: refreshToken, isActual: true });
+      const dataObject: CustomJWTPayload | string = JWT.verify(refreshToken, refreshTokenSecret);
 
-        if (actualToken && typeof dataObject !== 'string') {
-          const { id, email } = dataObject;
-          const accessToken = JWT.sign(
-            { id, email },
-            accessTokenSecret,
-            { expiresIn: ACCESS_TOKEN_LIFETIME },
-          );
+      const actualToken = await Tokens.findOne({ token: refreshToken, isActual: true });
 
-          res
-            .status(200)
-            .cookie('accessToken', accessToken, {
-              maxAge: convertLifetimeStringToMilliseconds(ACCESS_TOKEN_LIFETIME),
-              secure: true,
-            })
-            .json({ accessToken, refreshToken });
-        } else {
-          next(new CustomResponseError(401, 'Unauthorized access'));
-        }
+      if (actualToken && typeof dataObject !== 'string') {
+        const { id, email } = dataObject;
+        const accessToken = JWT.sign(
+          { id, email },
+          accessTokenSecret,
+          { expiresIn: ACCESS_TOKEN_LIFETIME },
+        );
+
+        res
+          .status(200)
+          .cookie('accessToken', accessToken, {
+            maxAge: convertLifetimeStringToMilliseconds(ACCESS_TOKEN_LIFETIME),
+            secure: true,
+          })
+          .json({ accessToken, refreshToken });
       } else {
-        next(new CustomResponseError(401, 'Token not provided'));
+        next(new CustomResponseError(401, 'Unauthorized access'));
       }
     } catch (error) {
-      await Tokens.findOne({ token: refreshToken, isActual: true }).update({ isActual: false });
+      await Tokens.findOne(
+        { token: refreshTokenValue, isActual: true },
+      ).update({ isActual: false });
       next(error);
     }
   }
