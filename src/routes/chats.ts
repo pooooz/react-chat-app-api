@@ -1,7 +1,7 @@
 import express from 'express';
 
-import { ChatsController } from '../controllers/chats/index.js';
-import { permissionCheck } from '../middlewares/permissionMiddleware.js';
+import { ChatsController } from '../controllers/chats';
+import { permissionCheck } from '../middlewares/permissionMiddleware';
 
 const router = express.Router();
 

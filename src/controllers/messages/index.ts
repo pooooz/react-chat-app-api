@@ -1,7 +1,9 @@
-import { Messages } from '../../models/messages.js';
+import { NextFunction, Request, Response } from 'express';
+
+import { Messages } from '../../models/messages';
 
 class Message {
-  async getMessagesByChatId(req, res, next) {
+  async getMessagesByChatId(req: Request, res: Response, next: NextFunction) {
     try {
       const chatMessages = await Messages.find({ chatId: req.params.chatId });
       res.send(chatMessages);
@@ -10,7 +12,7 @@ class Message {
     }
   }
 
-  async createMessage(req, res, next) {
+  async createMessage(req: Request, res: Response, next: NextFunction) {
     try {
       const newMessage = await Messages.create(req.body);
       res.json(newMessage);
@@ -19,7 +21,7 @@ class Message {
     }
   }
 
-  async deleteMessage(req, res, next) {
+  async deleteMessage(req: Request, res: Response, next: NextFunction) {
     try {
       const deleted = await Messages.findByIdAndDelete(req.params.messageId);
       res.json(deleted);
@@ -28,7 +30,7 @@ class Message {
     }
   }
 
-  async updateMessage(req, res, next) {
+  async updateMessage(req: Request, res: Response, next: NextFunction) {
     try {
       const outdated = await Messages.findByIdAndUpdate(req.params.messageId, { $set: req.body });
       res.json(outdated);

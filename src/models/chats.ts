@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
 
-import { duplicateKeyHandler } from './errorHandlers/duplicateKeyHandler.js';
+import { duplicateKeyHandler } from './errorHandlers/duplicateKeyHandler';
+import { ChatData } from './interfaces';
 
 const { Schema, model } = mongoose;
 
-const ChatSchema = new Schema({
+const ChatSchema = new Schema<ChatData>({
   name: {
     type: String,
     required: true,

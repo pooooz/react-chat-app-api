@@ -1,7 +1,7 @@
 import express from 'express';
 
-import { MessagesController } from '../controllers/messages/index.js';
-import { permissionCheck } from '../middlewares/permissionMiddleware.js';
+import { MessagesController } from '../controllers/messages';
+import { permissionCheck } from '../middlewares/permissionMiddleware';
 
 const router = express.Router();
 

@@ -1,10 +1,12 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
-import { duplicateKeyHandler } from './errorHandlers/duplicateKeyHandler.js';
+
+import { duplicateKeyHandler } from './errorHandlers/duplicateKeyHandler';
+import { UserSchema } from './interfaces';
 
 const { Schema, model } = mongoose;
 
-const UserSchema = new Schema({
+const UserSchema = new Schema<UserSchema>({
   email: {
     type: String,
     required: true,

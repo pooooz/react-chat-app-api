@@ -8,16 +8,16 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import 'dotenv/config';
 
-import ChatRouter from './routes/chats.js';
-import MessageRouter from './routes/messages.js';
-import UserRouter from './routes/user.js';
-import AuthRouter from './routes/auth.js';
+import ChatRouter from './routes/chats';
+import MessageRouter from './routes/messages';
+import UserRouter from './routes/user';
+import AuthRouter from './routes/auth';
+import { errorMiddleware } from './middlewares/errorMiddleware';
+import { authStrategy } from './middlewares/passportStrategy';
+import { configureWebSocket } from './utils/configureWebSocket';
 
-import { errorMiddleware } from './middlewares/errorMiddleware.js';
-import { authStrategy } from './middlewares/passportStrategy.js';
-import { configureWebSocket } from './utils/configureWebSocket.js';
-
-const URI = process.env.MONGODB_URI;
+const URI = process.env.MONGODB_URI as string;
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(' ');
 
 const app = express();
 
@@ -31,7 +31,7 @@ mongoose.connect(URI).then(() => {
 }).catch((error) => console.error(error));
 
 const corsOptions = {
-  origin: [process.env.ALLOWED_ORIGINS.split(' ')],
+  origin: allowedOrigins,
   credentials: true,
 };
 

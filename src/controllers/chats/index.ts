@@ -1,11 +1,15 @@
-import { Chats } from '../../models/chats.js';
-import { Users } from '../../models/users.js';
+import { NextFunction, Request, Response } from 'express';
+
+import { Chats } from '../../models/chats';
+import { Users } from '../../models/users';
+import { CustomResponseError } from '../../utils/exceptions';
 
 class Chat {
-  async getChatsByUserId(req, res, next) {
+  async getChatsByUserId(req: Request, res: Response, next: NextFunction) {
     try {
       const user = await Users.findById(req.params.userId);
-      if (user.chats.length !== 0) {
+
+      if (user && user.chats.length !== 0) {
         const chats = user.chats.map(async (chatId) => Chats.findById(chatId));
         Promise.all(chats).then((result) => {
           res.json(result);
@@ -19,37 +23,43 @@ class Chat {
     }
   }
 
-  async createChat(req, res, next) {
+  async createChat(req: Request, res: Response, next: NextFunction) {
     try {
       const newChat = await Chats.create(req.body);
       const creator = await Users.findById(req.body.creator);
-      await Users.findByIdAndUpdate(
-        req.body.creator,
-        { $set: { chats: [...creator.chats, newChat._id] } },
-      );
-      res.status(201);
-      res.json(newChat);
+
+      if (creator) {
+        await Users.findByIdAndUpdate(
+          req.body.creator,
+          { $set: { chats: [...creator.chats, newChat._id] } },
+        );
+        res.status(201);
+        res.json(newChat);
+      }
     } catch (error) {
       next(error);
     }
   }
 
-  async leaveChat(req, res, next) {
+  async leaveChat(req: Request, res: Response, next: NextFunction) {
     try {
-      const member = await Users.findById(req.user.id);
-      const newChats = member.chats.filter((chat) => chat._id.toString() !== req.params.chatId);
+      const member = await Users.findById(req.user?.id);
 
-      await Users.findByIdAndUpdate(
-        req.user.id,
-        { $set: { chats: newChats } },
-      );
-      res.json({ _id: req.params.chatId });
+      if (member) {
+        const newChats = member.chats.filter((chat) => chat._id.toString() !== req.params.chatId);
+
+        await Users.findByIdAndUpdate(
+          req.user?.id,
+          { $set: { chats: newChats } },
+        );
+        res.json({ _id: req.params.chatId });
+      }
     } catch (error) {
       next(error);
     }
   }
 
-  async addMember(req, res, next) {
+  async addMember(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.body;
       const member = await Users.findById(id);
@@ -72,7 +82,7 @@ class Chat {
         );
         res.json({ isInvited: true });
       } else {
-        next({ status: 400, message: 'The user with the given id does not exist' });
+        next(new CustomResponseError(400, 'The user with the given id does not exist'));
       }
     } catch (error) {
       next(error);
