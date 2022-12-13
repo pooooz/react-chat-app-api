@@ -10,7 +10,7 @@ import {
 
 import { Users } from '../../models/users';
 import { Tokens } from '../../models/tokens';
-import { convertLifetimeStringToMilliseconds } from '../../utils';
+import { convertLifetimeStringToMilliseconds } from '../../utils/convertLifetimeStringToMilliseconds';
 import { CustomResponseError } from '../../utils/exceptions';
 import { AuthPayloadSchema } from '../../dto/user';
 import { RefreshPayloadSchema } from '../../dto/tokens';
